@@ -28,6 +28,10 @@ import random
 
 from string import ascii_letters
 
+from .settings import (
+    api_mode
+)
+
 from .compat import (
     compat_basestring,
     compat_cookiejar,
@@ -2254,9 +2258,46 @@ class YoutubeDL(object):
             table[-1][-1] += (' ' if table[-1][-1] else '') + '(best)'
 
         header_line = ['format code', 'extension', 'resolution', 'note']
-        self.to_screen(
-            '[info] Available formats for %s:\n%s' %
-            (info_dict['id'], render_table(header_line, table)))
+        if not api_mode:
+            self.to_screen(
+                '[info] Available formats for %s:\n%s' %
+                (info_dict['id'], render_table(header_line, table)))
+        else:
+            self.stream_formats(formats)
+
+    def stream_formats(self, formats):
+        formats_simple = []
+        for format in formats:
+            format_simple = {
+                'format_id': format.get('format_id'),
+                'filesize': format.get('filesize'),
+                'asr': format.get('asr'),
+                'tbr': format.get('tbr'),
+                'abr': format.get('abr'),
+                'height': format.get('height'),
+                'width': format.get('width'),
+                'fps': format.get('fps'),
+                'acodec': format.get('acodec'),
+                'vcodec': format.get('vcodec'),
+                'ext': format.get('ext'),
+                'url': format.get('url')
+            }
+            self.to_screen(json.dumps(format_simple))
+
+    def list_formats_sources(self, info_dict):
+        formats = info_dict.get('formats', [info_dict])
+        table = [
+            [f['format_id'], f['ext'], f['url'], f['container'], f['acodec'], f['vcodec'], f['fps']]
+            for f in formats
+            if f.get('preference') is None or f['preference'] >= -1000]
+        if len(formats) > 1:
+            table[-1][-1] += (' ' if table[-1][-1] else '') + '(best)'
+
+        header_line = ['format code', 'extension', 'resolution', 'note']
+        if not api_mode:
+            self.to_screen(
+                '[info] Available formats for %s:\n%s' %
+                (info_dict['id'], render_table(header_line, table)))
 
     def list_thumbnails(self, info_dict):
         thumbnails = info_dict.get('thumbnails')

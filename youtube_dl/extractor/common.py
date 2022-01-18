@@ -15,6 +15,10 @@ import sys
 import time
 import math
 
+from ..settings import (
+    api_mode,
+)
+
 from ..compat import (
     compat_cookiejar_Cookie,
     compat_cookies_SimpleCookie,
@@ -82,7 +86,6 @@ from ..utils import (
     xpath_text,
     xpath_with_ns,
 )
-
 
 class InfoExtractor(object):
     """Information Extractor class.
@@ -918,7 +921,8 @@ class InfoExtractor(object):
 
     def to_screen(self, msg):
         """Print msg to screen, prefixing it with '[ie_name]'"""
-        self._downloader.to_screen('[%s] %s' % (self.IE_NAME, msg))
+        if not api_mode:
+            self._downloader.to_screen('[%s] %s' % (self.IE_NAME, msg))
 
     def report_extraction(self, id_or_name):
         """Report information extraction."""
